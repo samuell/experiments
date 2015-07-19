@@ -18,27 +18,25 @@ func main() {
 	split := NewStringSplitter()
 	lower := NewLowerCaser()
 	upper := NewUpperCaser()
+	zippr := NewZipper()
+	prntr := NewPrinter()
 
 	// Network definition *** This is where to look! ***
 	split.In = hisay.Out
 	lower.In = split.OutLeft
 	upper.In = split.OutRight
+	zippr.In1 = lower.Out
+	zippr.In2 = upper.Out
+	prntr.In = zippr.Out
 
 	// Set up processes for running (spawn go-routines)
 	go hisay.Run()
 	go split.Run()
 	go lower.Run()
 	go upper.Run()
+	go zippr.Run()
+	prntr.Run()
 
-	// Drive the processing
-	for {
-		left, okLeft := <-lower.Out
-		right, okRight := <-upper.Out
-		if !okLeft && !okRight {
-			break
-		}
-		println(left, right)
-	}
 	println("Finished program!")
 }
 
@@ -49,9 +47,7 @@ type hiSayer struct {
 }
 
 func NewHiSayer() *hiSayer {
-	t := new(hiSayer)
-	t.Out = make(chan string, BUFSIZE)
-	return t
+	return &hiSayer{Out: make(chan string, BUFSIZE)}
 }
 
 func (proc *hiSayer) Run() {
@@ -70,10 +66,10 @@ type stringSplitter struct {
 }
 
 func NewStringSplitter() *stringSplitter {
-	proc := new(stringSplitter)
-	proc.OutLeft = make(chan string, BUFSIZE)
-	proc.OutRight = make(chan string, BUFSIZE)
-	return proc
+	return &stringSplitter{
+		OutLeft:  make(chan string, BUFSIZE),
+		OutRight: make(chan string, BUFSIZE),
+	}
 }
 
 func (proc *stringSplitter) Run() {
@@ -94,9 +90,7 @@ type lowerCaser struct {
 }
 
 func NewLowerCaser() *lowerCaser {
-	proc := new(lowerCaser)
-	proc.Out = make(chan string, BUFSIZE)
-	return proc
+	return &lowerCaser{Out: make(chan string, BUFSIZE)}
 }
 
 func (proc *lowerCaser) Run() {
@@ -114,14 +108,52 @@ type upperCaser struct {
 }
 
 func NewUpperCaser() *upperCaser {
-	proc := new(upperCaser)
-	proc.Out = make(chan string, BUFSIZE)
-	return proc
+	return &upperCaser{Out: make(chan string, BUFSIZE)}
 }
 
 func (proc *upperCaser) Run() {
 	defer close(proc.Out)
 	for s := range proc.In {
 		proc.Out <- strings.ToUpper(s)
+	}
+}
+
+// ======= Merger =======
+
+type zipper struct {
+	In1 chan string
+	In2 chan string
+	Out chan string
+}
+
+func NewZipper() *zipper {
+	return &zipper{Out: make(chan string, BUFSIZE)}
+}
+
+func (proc *zipper) Run() {
+	defer close(proc.Out)
+	for {
+		s1, ok1 := <-proc.In1
+		s2, ok2 := <-proc.In2
+		if !ok1 && !ok2 {
+			break
+		}
+		proc.Out <- fmt.Sprint(s1, s2)
+	}
+}
+
+// ======= Printer =======
+
+type printer struct {
+	In chan string
+}
+
+func NewPrinter() *printer {
+	return &printer{}
+}
+
+func (proc *printer) Run() {
+	for s := range proc.In {
+		fmt.Println(s)
 	}
 }
