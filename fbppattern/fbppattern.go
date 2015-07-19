@@ -14,35 +14,35 @@ const (
 
 func main() {
 	// Init processes
-	hs := NewHiSayer()
-	ss := NewStringSplitter()
-	lc := NewLowerCaser()
-	uc := NewUpperCaser()
+	hisay := NewHiSayer()
+	split := NewStringSplitter()
+	lower := NewLowerCaser()
+	upper := NewUpperCaser()
 
-	// Network definition
-	ss.In = hs.Out
-	lc.In = ss.OutLeft
-	uc.In = ss.OutRight
+	// Network definition *** This is where to look! ***
+	split.In = hisay.Out
+	lower.In = split.OutLeft
+	upper.In = split.OutRight
 
 	// Set up processes for running (spawn go-routines)
-	hs.Init()
-	ss.Init()
-	lc.Init()
-	uc.Init()
+	go hisay.Run()
+	go split.Run()
+	go lower.Run()
+	go upper.Run()
 
 	// Drive the processing
 	for {
-		l, okl := <-lc.Out
-		r, okr := <-uc.Out
-		if !okl && !okr {
+		left, okLeft := <-lower.Out
+		right, okRight := <-upper.Out
+		if !okLeft && !okRight {
 			break
 		}
-		println(l, r)
+		println(left, right)
 	}
 	println("Finished program!")
 }
 
-// ======= HiGenerator =======
+// ======= HiSayer =======
 
 type hiSayer struct {
 	Out chan string
@@ -54,13 +54,11 @@ func NewHiSayer() *hiSayer {
 	return t
 }
 
-func (t *hiSayer) Init() {
-	go func() {
-		defer close(t.Out)
-		for _, i := range []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10} {
-			t.Out <- fmt.Sprintf("Hi for the %d:th time!", i)
-		}
-	}()
+func (proc *hiSayer) Run() {
+	defer close(proc.Out)
+	for _, i := range []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10} {
+		proc.Out <- fmt.Sprintf("Hi for the %d:th time!", i)
+	}
 }
 
 // ======= StringSplitter =======
@@ -72,22 +70,20 @@ type stringSplitter struct {
 }
 
 func NewStringSplitter() *stringSplitter {
-	ss := new(stringSplitter)
-	ss.OutLeft = make(chan string, BUFSIZE)
-	ss.OutRight = make(chan string, BUFSIZE)
-	return ss
+	proc := new(stringSplitter)
+	proc.OutLeft = make(chan string, BUFSIZE)
+	proc.OutRight = make(chan string, BUFSIZE)
+	return proc
 }
 
-func (ss *stringSplitter) Init() {
-	go func() {
-		defer close(ss.OutLeft)
-		defer close(ss.OutRight)
-		for s := range ss.In {
-			halfLen := int(math.Floor(float64(len(s)) / float64(2)))
-			ss.OutLeft <- s[0:halfLen]
-			ss.OutRight <- s[halfLen:len(s)]
-		}
-	}()
+func (proc *stringSplitter) Run() {
+	defer close(proc.OutLeft)
+	defer close(proc.OutRight)
+	for s := range proc.In {
+		halfLen := int(math.Floor(float64(len(s)) / float64(2)))
+		proc.OutLeft <- s[0:halfLen]
+		proc.OutRight <- s[halfLen:len(s)]
+	}
 }
 
 // ======= LowerCaser =======
@@ -98,18 +94,16 @@ type lowerCaser struct {
 }
 
 func NewLowerCaser() *lowerCaser {
-	lc := new(lowerCaser)
-	lc.Out = make(chan string, BUFSIZE)
-	return lc
+	proc := new(lowerCaser)
+	proc.Out = make(chan string, BUFSIZE)
+	return proc
 }
 
-func (lc *lowerCaser) Init() {
-	go func() {
-		defer close(lc.Out)
-		for s := range lc.In {
-			lc.Out <- strings.ToLower(s)
-		}
-	}()
+func (proc *lowerCaser) Run() {
+	defer close(proc.Out)
+	for s := range proc.In {
+		proc.Out <- strings.ToLower(s)
+	}
 }
 
 // ======= UpperCaser =======
@@ -120,16 +114,14 @@ type upperCaser struct {
 }
 
 func NewUpperCaser() *upperCaser {
-	uc := new(upperCaser)
-	uc.Out = make(chan string, BUFSIZE)
-	return uc
+	proc := new(upperCaser)
+	proc.Out = make(chan string, BUFSIZE)
+	return proc
 }
 
-func (uc *upperCaser) Init() {
-	go func() {
-		defer close(uc.Out)
-		for s := range uc.In {
-			uc.Out <- strings.ToUpper(s)
-		}
-	}()
+func (proc *upperCaser) Run() {
+	defer close(proc.Out)
+	for s := range proc.In {
+		proc.Out <- strings.ToUpper(s)
+	}
 }
