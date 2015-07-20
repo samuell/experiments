@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"math"
+	"reflect"
 	"strings"
 )
 
@@ -13,13 +14,17 @@ const (
 // ======= Main =======
 
 func main() {
+	pl := NewPipeline()
+
 	// Init processes
-	hisay := NewHiSayer()
-	split := NewStringSplitter()
-	lower := NewLowerCaser()
-	upper := NewUpperCaser()
-	zippr := NewZipper()
-	prntr := NewPrinter()
+	hisay := NewHiSayer(pl)
+	split := NewStringSplitter(pl)
+	lower := NewLowerCaser(pl)
+	upper := NewUpperCaser(pl)
+	zippr := NewZipper(pl)
+	prntr := NewPrinter(pl)
+
+	pl.PrintPipeline()
 
 	// Network definition *** This is where to look! ***
 	split.In = hisay.Out
@@ -46,8 +51,10 @@ type hiSayer struct {
 	Out chan string
 }
 
-func NewHiSayer() *hiSayer {
-	return &hiSayer{Out: make(chan string, BUFSIZE)}
+func NewHiSayer(pl *pipeline) *hiSayer {
+	t := &hiSayer{Out: make(chan string, BUFSIZE)}
+	pl.AddTask(t)
+	return t
 }
 
 func (proc *hiSayer) Run() {
@@ -65,11 +72,13 @@ type stringSplitter struct {
 	OutRight chan string
 }
 
-func NewStringSplitter() *stringSplitter {
-	return &stringSplitter{
+func NewStringSplitter(pl *pipeline) *stringSplitter {
+	t := &stringSplitter{
 		OutLeft:  make(chan string, BUFSIZE),
 		OutRight: make(chan string, BUFSIZE),
 	}
+	pl.AddTask(t)
+	return t
 }
 
 func (proc *stringSplitter) Run() {
@@ -89,8 +98,10 @@ type lowerCaser struct {
 	Out chan string
 }
 
-func NewLowerCaser() *lowerCaser {
-	return &lowerCaser{Out: make(chan string, BUFSIZE)}
+func NewLowerCaser(pl *pipeline) *lowerCaser {
+	t := &lowerCaser{Out: make(chan string, BUFSIZE)}
+	pl.AddTask(t)
+	return t
 }
 
 func (proc *lowerCaser) Run() {
@@ -107,8 +118,10 @@ type upperCaser struct {
 	Out chan string
 }
 
-func NewUpperCaser() *upperCaser {
-	return &upperCaser{Out: make(chan string, BUFSIZE)}
+func NewUpperCaser(pl *pipeline) *upperCaser {
+	t := &upperCaser{Out: make(chan string, BUFSIZE)}
+	pl.AddTask(t)
+	return t
 }
 
 func (proc *upperCaser) Run() {
@@ -126,8 +139,10 @@ type zipper struct {
 	Out chan string
 }
 
-func NewZipper() *zipper {
-	return &zipper{Out: make(chan string, BUFSIZE)}
+func NewZipper(pl *pipeline) *zipper {
+	t := &zipper{Out: make(chan string, BUFSIZE)}
+	pl.AddTask(t)
+	return t
 }
 
 func (proc *zipper) Run() {
@@ -148,12 +163,34 @@ type printer struct {
 	In chan string
 }
 
-func NewPrinter() *printer {
-	return &printer{}
+func NewPrinter(pl *pipeline) *printer {
+	t := &printer{}
+	pl.AddTask(t)
+	return t
 }
 
 func (proc *printer) Run() {
 	for s := range proc.In {
 		fmt.Println(s)
+	}
+}
+
+// ======= Pipeline =======
+
+type pipeline struct {
+	tasks []interface{}
+}
+
+func NewPipeline() *pipeline {
+	return &pipeline{}
+}
+
+func (pl *pipeline) AddTask(t interface{}) {
+	pl.tasks = append(pl.tasks, t)
+}
+
+func (pl *pipeline) PrintPipeline() {
+	for i, task := range pl.tasks {
+		fmt.Printf("Task %d: %v\n", i, reflect.TypeOf(task))
 	}
 }
