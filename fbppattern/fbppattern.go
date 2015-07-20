@@ -9,13 +9,15 @@ import (
 )
 
 const (
-	BUFSIZE = 16
+	BUFSIZE = 16384
 )
 
 // ======= Main =======
 
 func main() {
-	runtime.GOMAXPROCS(4)
+	numThreads := runtime.NumCPU() - 1
+	fmt.Println("Starting ", numThreads, " threads ...")
+	runtime.GOMAXPROCS(numThreads)
 
 	pipeline := NewPipeline()
 
