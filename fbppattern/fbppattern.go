@@ -32,9 +32,6 @@ func main() {
 	zippr.In2 = upper.Out
 	prntr.In = zippr.Out
 
-	fmt.Println("The pipeline currently looks like this:")
-	pipeline.PrintPipeline()
-	fmt.Println("Running pipeline...")
 	pipeline.Run()
 
 	println("Finished program!")
