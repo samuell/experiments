@@ -196,7 +196,7 @@ func (pl *pipeline) PrintPipeline() {
 
 func (pl *pipeline) Run() {
 	for i, task := range pl.tasks {
-		if i < len(pl.tasks) {
+		if i < len(pl.tasks)-1 {
 			go task.Run()
 		} else {
 			task.Run()
