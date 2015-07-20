@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 	"reflect"
+	"runtime"
 	"strings"
 )
 
@@ -14,6 +15,8 @@ const (
 // ======= Main =======
 
 func main() {
+	runtime.GOMAXPROCS(4)
+
 	pipeline := NewPipeline()
 
 	// Init processes
@@ -49,7 +52,7 @@ func NewHiSayer(pl *pipeline) *hiSayer {
 
 func (proc *hiSayer) Run() {
 	defer close(proc.Out)
-	for _, i := range []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10} {
+	for i := 1; i <= 1e6; i++ {
 		proc.Out <- fmt.Sprintf("Hi for the %d:th time!", i)
 	}
 }
