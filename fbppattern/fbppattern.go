@@ -33,8 +33,6 @@ func main() {
 	prntr.In = zippr.Out
 
 	pipeline.Run()
-
-	println("Finished program!")
 }
 
 // ======= HiSayer =======
