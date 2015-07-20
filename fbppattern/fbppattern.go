@@ -14,17 +14,15 @@ const (
 // ======= Main =======
 
 func main() {
-	pl := NewPipeline()
+	pipeline := NewPipeline()
 
 	// Init processes
-	hisay := NewHiSayer(pl)
-	split := NewStringSplitter(pl)
-	lower := NewLowerCaser(pl)
-	upper := NewUpperCaser(pl)
-	zippr := NewZipper(pl)
-	prntr := NewPrinter(pl)
-
-	pl.PrintPipeline()
+	hisay := NewHiSayer(pipeline)
+	split := NewStringSplitter(pipeline)
+	lower := NewLowerCaser(pipeline)
+	upper := NewUpperCaser(pipeline)
+	zippr := NewZipper(pipeline)
+	prntr := NewPrinter(pipeline)
 
 	// Network definition *** This is where to look! ***
 	split.In = hisay.Out
@@ -34,13 +32,10 @@ func main() {
 	zippr.In2 = upper.Out
 	prntr.In = zippr.Out
 
-	// Set up processes for running (spawn go-routines)
-	go hisay.Run()
-	go split.Run()
-	go lower.Run()
-	go upper.Run()
-	go zippr.Run()
-	prntr.Run()
+	fmt.Println("The pipeline currently looks like this:")
+	pipeline.PrintPipeline()
+	fmt.Println("Running pipeline...")
+	pipeline.Run()
 
 	println("Finished program!")
 }
@@ -175,22 +170,41 @@ func (proc *printer) Run() {
 	}
 }
 
+// ======= task interface =======
+
+type task interface {
+	Run()
+}
+
 // ======= Pipeline =======
 
 type pipeline struct {
-	tasks []interface{}
+	tasks []task
 }
 
 func NewPipeline() *pipeline {
 	return &pipeline{}
 }
 
-func (pl *pipeline) AddTask(t interface{}) {
+func (pl *pipeline) AddTask(t task) {
 	pl.tasks = append(pl.tasks, t)
 }
 
 func (pl *pipeline) PrintPipeline() {
+	sep := "------------------------------------------------------------------------"
+	fmt.Println(sep)
 	for i, task := range pl.tasks {
 		fmt.Printf("Task %d: %v\n", i, reflect.TypeOf(task))
+	}
+	fmt.Println(sep)
+}
+
+func (pl *pipeline) Run() {
+	for i, task := range pl.tasks {
+		if i < len(pl.tasks) {
+			go task.Run()
+		} else {
+			task.Run()
+		}
 	}
 }
