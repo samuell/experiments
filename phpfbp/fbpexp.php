@@ -80,7 +80,7 @@ class Foo2Bar implements IProcess {
 		$outstr = str_replace('foo', 'bar', $instr);
 		$this->out_bar->send($outstr);
 
-		if ( $this->in_foo->closed() ) {
+		if ( $this->in_foo->done() ) {
 			$this->out_bar->close();
 			return true;
 		}
@@ -134,11 +134,13 @@ class Printer implements IProcess {
 
 	public function execute() {
 		$instr = $this->in_str->recv();
-		echo "$instr\n";
+		if ( $instr !== '' ) {
+			echo "$instr\n";
+		}
 
-		if ( $this->in_str->closed() ) {
+		if ( $this->in_str->done() ) {
 			return true;
-		} // TODO: This is wrong!
+		}
 		return false;
 	}
 }
@@ -182,8 +184,8 @@ class Chan {
 		$this->closed = true;
 	}
 
-	public function closed() {
-		return $this->closed;
+	public function done() {
+		return $this->closed && count( $this->items ) == 0;
 	}
 }
 
