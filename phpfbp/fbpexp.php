@@ -1,5 +1,38 @@
 <?php
 
+// -------------------------------------------------------------------------------------
+//  What to run, when this file is executed as a script
+// -------------------------------------------------------------------------------------
+
+function main() {
+	$fooProgram = new FooExample();
+	$fooProgram->run();
+}
+
+// -------------------------------------------------------------------------------------
+//  Program Examples
+// -------------------------------------------------------------------------------------
+
+class FooExample implements IProgram {
+	function run() {
+		// Initialize processes
+		$foo_writer = new FooWriter();
+		$foo_to_bar = new Foo2Bar();
+		$printer = new Printer();
+
+		// Connect network
+		$foo_to_bar->in_foo = $foo_writer->out_foo;
+		$printer->in_str = $foo_to_bar->out_bar;
+
+		$net = new Network();
+		$net->add_processes([$foo_writer, $foo_to_bar, $printer]);
+		$net->run();
+	}
+}
+
+// -------------------------------------------------------------------------------------
+//  Processes
+// -------------------------------------------------------------------------------------
 
 class FooWriter implements IProcess {
 	public $out_foo = null;
@@ -56,6 +89,10 @@ class Printer implements IProcess {
 	}
 }
 
+// -------------------------------------------------------------------------------------
+//  FBP Components
+// -------------------------------------------------------------------------------------
+
 class Network {
 	protected $processes = [];
 
@@ -100,23 +137,16 @@ interface INetwork {
 	function run();
 }
 
+interface IProgram {
+	function run();
+}
+
 interface IProcess {
 	function execute();
 }
 
 // -------------------------------------------------------------------------------------
-//  Main program starts here
+//  Run this file as a script
 // -------------------------------------------------------------------------------------
 
-// Initialize processes
-$foo_writer = new FooWriter();
-$foo_to_bar = new Foo2Bar();
-$printer = new Printer();
-
-// Connect network
-$foo_to_bar->in_foo = $foo_writer->out_foo;
-$printer->in_str = $foo_to_bar->out_bar;
-
-$net = new Network();
-$net->add_processes([$foo_writer, $foo_to_bar, $printer]);
-$net->run();
+main();
