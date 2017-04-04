@@ -5,8 +5,10 @@
 // -------------------------------------------------------------------------------------
 
 function main() {
-	$fooProgram = new FooExample();
-	$fooProgram->run();
+	// $fooProgram = new FooExample();
+	// $fooProgram->run();
+	$splitExample = new StringSplitExample();
+	$splitExample->run();
 }
 
 // -------------------------------------------------------------------------------------
@@ -26,6 +28,21 @@ class FooExample implements IProgram {
 
 		$net = new Network();
 		$net->add_processes([$foo_writer, $foo_to_bar, $printer]);
+		$net->run();
+	}
+}
+
+class StringSplitExample implements IProgram {
+	function run() {
+		$str_writer = new StringWriter('hejsan hoppsan hoppas doppas kloppas');
+		$str_splitter = new StringSplitter();
+		$str_printer = new Printer();
+
+		$str_splitter->in_string = $str_writer->out_string;
+		$str_printer->in_str = $str_splitter->out_string_parts;
+
+		$net = new Network();
+		$net->add_processes([$str_writer, $str_splitter, $str_printer]);
 		$net->run();
 	}
 }
@@ -71,6 +88,43 @@ class Foo2Bar implements IProcess {
 	}
 }
 
+class StringWriter implements IProcess {
+	public $out_string = null;
+
+	protected $string_to_write = '';
+
+	public function __construct($string_to_write) {
+		$this->out_string = new Chan();
+		$this->string_to_write = $string_to_write;
+	}
+
+	public function execute() {
+		$this->out_string->send($this->string_to_write);
+		$this->out_string->close();
+		return true; // Done = true
+	}
+}
+
+class StringSplitter implements IProcess {
+	public $in_string = null;
+	public $out_string_parts = null;
+
+	public function __construct() {
+		$this->in_string = new Chan();
+		$this->out_string_parts = new Chan();
+	}
+
+	public function execute() {
+		$instr = $this->in_string->recv();
+		$string_parts = explode(' ', $instr);
+		foreach ($string_parts as $str_part ) {
+			$this->out_string_parts->send($str_part);
+		}
+		$this->out_string_parts->close();
+		return true; // Done = true
+	}
+}
+
 class Printer implements IProcess {
 	public $in_str = null;
 
@@ -84,7 +138,7 @@ class Printer implements IProcess {
 
 		if ( $this->in_str->closed() ) {
 			return true;
-		}
+		} // TODO: This is wrong!
 		return false;
 	}
 }
