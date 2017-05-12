@@ -65,6 +65,48 @@ func main() {
 	prt.Run()
 }
 
+// --------------------------------------------------------------------------------
+// FileReader
+// --------------------------------------------------------------------------------
+
+type FileReader struct {
+	In_FileName chan string
+	Out_Line    *DisruptorChan
+	fs          afero.Fs
+}
+
+func NewOsFileReader() *FileReader {
+	return NewFileReader(afero.NewOsFs())
+}
+
+func NewFileReader(fileSystem afero.Fs) *FileReader {
+	return &FileReader{
+		In_FileName: make(chan string, BUFSIZE),
+		Out_Line:    NewDisruptorChan(),
+		fs:          fileSystem,
+	}
+}
+
+func (p *FileReader) Run() {
+	defer p.Out_Line.Close()
+
+	for fileName := range p.In_FileName {
+		fh, err := p.fs.Open(fileName)
+		if err != nil {
+			panic(err)
+		}
+		defer fh.Close()
+
+		sc := bufio.NewScanner(fh)
+		for sc.Scan() {
+			if err := sc.Err(); err != nil {
+				panic(err)
+			}
+			p.Out_Line.Send(NewFastaLine(sc.Bytes()))
+		}
+	}
+}
+
 // ------------------------------------------------
 // BaseComplementer
 // ------------------------------------------------
@@ -105,48 +147,6 @@ func (p *BaseComplementer) Run() {
 			}
 		}
 		p.Out_FastaLine.Send(NewFastaLine(l))
-	}
-}
-
-// --------------------------------------------------------------------------------
-// FileReader
-// --------------------------------------------------------------------------------
-
-type FileReader struct {
-	In_FileName chan string
-	Out_Line    *DisruptorChan
-	fs          afero.Fs
-}
-
-func NewOsFileReader() *FileReader {
-	return NewFileReader(afero.NewOsFs())
-}
-
-func NewFileReader(fileSystem afero.Fs) *FileReader {
-	return &FileReader{
-		In_FileName: make(chan string, BUFSIZE),
-		Out_Line:    NewDisruptorChan(),
-		fs:          fileSystem,
-	}
-}
-
-func (p *FileReader) Run() {
-	defer p.Out_Line.Close()
-
-	for fileName := range p.In_FileName {
-		fh, err := p.fs.Open(fileName)
-		if err != nil {
-			panic(err)
-		}
-		defer fh.Close()
-
-		sc := bufio.NewScanner(fh)
-		for sc.Scan() {
-			if err := sc.Err(); err != nil {
-				panic(err)
-			}
-			p.Out_Line.Send(NewFastaLine(sc.Bytes()))
-		}
 	}
 }
 

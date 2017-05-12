@@ -63,44 +63,6 @@ func main() {
 	prt.Run()
 }
 
-// ------------------------------------------------
-// BaseComplementer
-// ------------------------------------------------
-
-type BaseComplementer struct {
-	In_FastaLine  chan []byte
-	Out_FastaLine chan []byte
-}
-
-func NewBaseComplementer() *BaseComplementer {
-	return &BaseComplementer{
-		In_FastaLine:  make(chan []byte, BUFSIZE),
-		Out_FastaLine: make(chan []byte, BUFSIZE),
-	}
-}
-
-var convTable = [256]byte{
-	'A':  'T',
-	'T':  'A',
-	'C':  'G',
-	'G':  'C',
-	'N':  'N',
-	'\n': '\n',
-}
-
-func (p *BaseComplementer) Run() {
-	defer close(p.Out_FastaLine)
-
-	for line := range p.In_FastaLine {
-		if line[0] != '>' {
-			for pos := range line {
-				line[pos] = convTable[line[pos]]
-			}
-		}
-		p.Out_FastaLine <- line
-	}
-}
-
 // --------------------------------------------------------------------------------
 // FileReader
 // --------------------------------------------------------------------------------
@@ -140,6 +102,44 @@ func (p *FileReader) Run() {
 			}
 			p.Out_Line <- append([]byte(nil), sc.Bytes()...)
 		}
+	}
+}
+
+// ------------------------------------------------
+// BaseComplementer
+// ------------------------------------------------
+
+type BaseComplementer struct {
+	In_FastaLine  chan []byte
+	Out_FastaLine chan []byte
+}
+
+func NewBaseComplementer() *BaseComplementer {
+	return &BaseComplementer{
+		In_FastaLine:  make(chan []byte, BUFSIZE),
+		Out_FastaLine: make(chan []byte, BUFSIZE),
+	}
+}
+
+var convTable = [256]byte{
+	'A':  'T',
+	'T':  'A',
+	'C':  'G',
+	'G':  'C',
+	'N':  'N',
+	'\n': '\n',
+}
+
+func (p *BaseComplementer) Run() {
+	defer close(p.Out_FastaLine)
+
+	for line := range p.In_FastaLine {
+		if line[0] != '>' {
+			for pos := range line {
+				line[pos] = convTable[line[pos]]
+			}
+		}
+		p.Out_FastaLine <- line
 	}
 }
 
