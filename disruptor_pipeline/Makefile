@@ -4,10 +4,7 @@
 Homo%: Homo%.gz
 	zcat $< > $@
 
-chr1.fa: Homo_sapiens.GRCh38.dna.chromosome.1.fa
-	ln -s $< $@
-
-all.fa: Homo_sapiens.GRCh38.dna.toplevel.fa
+chry.fa: Homo_sapiens.GRCh38.dna.chromosome.Y.fa
 	ln -s $< $@
 
 basecompl_chan: basecompl_chan.go
@@ -32,4 +29,4 @@ basecompl_disruptor: basecompl_disruptor.go
 	echo; \
 	done | tee $@;
 
-times: chr1.time.log
+times: chry.time.log
