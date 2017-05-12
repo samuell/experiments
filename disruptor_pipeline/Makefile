@@ -5,10 +5,10 @@
 	zcat $< > $@
 
 chr1.fa: Homo_sapiens.GRCh38.dna.chromosome.1.fa
-	ln -s %< %@
+	ln -s $< $@
 
 all.fa: Homo_sapiens.GRCh38.dna.toplevel.fa.gz
-	ln -s %< %@
+	ln -s $< $@
 
 basecompl_chan: basecompl_chan.go
 	go build $<
