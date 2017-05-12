@@ -37,7 +37,7 @@ Timing chan implementation ...
 Wall time: 4.05 sec
 
 Timing disruptor implementation ...
-Wall time: 3.23 sec
+Wall time: 3.25 sec
 
 --------------------------------------------------------------------------------
 Setting GOMAXPROCS to 2
@@ -46,16 +46,16 @@ Timing chan implementation ...
 Wall time: 2.78 sec
 
 Timing disruptor implementation ...
-Wall time: 2.59 sec
+Wall time: 2.65 sec
 
 --------------------------------------------------------------------------------
 Setting GOMAXPROCS to 3
 --------------------------------------------------------------------------------
 Timing chan implementation ...
-Wall time: 2.83 sec
+Wall time: 2.82 sec
 
 Timing disruptor implementation ...
-Wall time: 2.86 sec
+Wall time: 2.77 sec
 
 --------------------------------------------------------------------------------
 Setting GOMAXPROCS to 4
@@ -64,5 +64,5 @@ Timing chan implementation ...
 Wall time: 3.05 sec
 
 Timing disruptor implementation ...
-Wall time: 3.38 sec
+Wall time: 3.39 sec
 ```

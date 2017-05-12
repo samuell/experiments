@@ -82,7 +82,7 @@ func (p *BaseComplementer) Run() {
 	defer close(p.Out_FastaLine)
 
 	for line := range p.In_FastaLine {
-		if len(line) > 0 && line[0] != '>' {
+		if line[0] != '>' {
 			for pos := range line {
 				line[pos] = convTable[line[pos]]
 			}
