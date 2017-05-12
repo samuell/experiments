@@ -183,9 +183,9 @@ func (p *Printer) Run() {
 // Which is licensed under Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 //
 // Changes made:
-// - Use []byte as data type instead of payload.
+// - Use *FastaFinder as data type instead of *PayLoad
 // - Added some closing logic
-// - Some naming changes (shorter names)
+// - Some naming changes
 // ------------------------------------------------
 
 // Masking is faster than division
