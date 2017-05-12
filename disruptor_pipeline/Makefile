@@ -16,12 +16,6 @@ basecompl_chan: basecompl_chan.go
 basecompl_disruptor: basecompl_disruptor.go
 	go build $<
 
-basecompl_chan_4procs: basecompl_chan_4procs.go
-	go build $<
-
-basecompl_disruptor_4procs: basecompl_disruptor_4procs.go
-	go build $<
-
 times_all.log: all.fa basecompl_chan basecompl_disruptor
 	for i in $$(seq 1 4); do \
 	echo "--------------------------------------------------------------------------------"; \
