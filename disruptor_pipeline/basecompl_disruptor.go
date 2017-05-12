@@ -2,9 +2,10 @@ package main
 
 import (
 	"bufio"
-	"github.com/spf13/afero"
-	//"os"
+	"flag"
 	"fmt"
+	"github.com/spf13/afero"
+	"os"
 	"runtime"
 	"sync/atomic"
 )
@@ -15,11 +16,11 @@ const (
 
 func main() {
 	// Parse flags
-	inFileName := flag.String("in", "i", "The input file name")
+	inFileNamePtr := flag.String("in", "", "The input file name")
 	flag.Parse()
 
-	doExit := false
-	if *inFileName == "" {
+	inFileName := *inFileNamePtr
+	if inFileName == "" {
 		fmt.Println("No filename specified to --in")
 		os.Exit(1)
 	}
@@ -50,7 +51,7 @@ func main() {
 	// Run
 	go func() {
 		defer close(frd.In_FileName)
-		frd.In_FileName <- inFileName
+		frd.In_FileName <- string(inFileName)
 	}()
 	go frd.Run()
 	go bc1.Run()

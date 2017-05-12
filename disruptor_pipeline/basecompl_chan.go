@@ -2,9 +2,10 @@ package main
 
 import (
 	"bufio"
-	"github.com/spf13/afero"
-	//"os"
+	"flag"
 	"fmt"
+	"github.com/spf13/afero"
+	"os"
 )
 
 const (
@@ -13,11 +14,11 @@ const (
 
 func main() {
 	// Parse flags
-	inFileName := flag.String("in", "i", "The input file name")
+	inFileNamePtr := flag.String("in", "", "The input file name")
 	flag.Parse()
 
-	doExit := false
-	if *inFileName == "" {
+	inFileName := *inFileNamePtr
+	if inFileName == "" {
 		fmt.Println("No filename specified to --in")
 		os.Exit(1)
 	}
