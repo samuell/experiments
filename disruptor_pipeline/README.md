@@ -2,11 +2,15 @@
 
 This is an experiment to see how using the [LMAX disruptor pattern](https://lmax-exchange.github.io/disruptor/)
 as implemented in a slightly adapter version of [Darren Elwood](https://github.com/textnode)'s [gringo](https://github.com/textnode/gringo)
-instead of plain Go channels.
+lock-free ring buffer, as an alternative to plain Go channels.
 
 The example program used, is a chain of 8 similar [base-complementer](https://en.wikipedia.org/wiki/Complementarity_(molecular_biology)#DNA_and_RNA_base_pair_complementarity)
 on a [58 Mb DNA sequence text file](ftp://ftp.ensembl.org/pub/release-67/fasta/homo_sapiens/dna/Homo_sapiens.GRCh37.67.dna_rm.chromosome.Y.fa.gz),
 in [FASTA format](https://en.wikipedia.org/wiki/FASTA_format).
+
+I'm sure I have made some stupid errors leading to sub-par performance in these codes. Please contact
+me on [@smllmp](http://twitter.com/smllmp) or in the [issue tracker](https://github.com/samuell/experiments/issues)
+to suggest improvements!
 
 ## Prerequisites
 
