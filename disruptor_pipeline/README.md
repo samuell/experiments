@@ -34,35 +34,35 @@ This is output I get when I run on my Laptop, with an Intel Core i5-4210U CPU (1
 Setting GOMAXPROCS to 1
 --------------------------------------------------------------------------------
 Timing chan implementation ...
-Wall time: 3.98 sec
+Wall time: 4.16 sec
 
 Timing disruptor implementation ...
-Wall time: 3.72 sec
+Wall time: 3.85 sec
 
 --------------------------------------------------------------------------------
 Setting GOMAXPROCS to 2
 --------------------------------------------------------------------------------
 Timing chan implementation ...
-Wall time: 2.50 sec
+Wall time: 2.95 sec
 
 Timing disruptor implementation ...
-Wall time: 2.38 sec
+Wall time: 2.49 sec
 
 --------------------------------------------------------------------------------
 Setting GOMAXPROCS to 3
 --------------------------------------------------------------------------------
 Timing chan implementation ...
-Wall time: 2.78 sec
+Wall time: 3.50 sec
 
 Timing disruptor implementation ...
-Wall time: 2.89 sec
+Wall time: 3.34 sec
 
 --------------------------------------------------------------------------------
 Setting GOMAXPROCS to 4
 --------------------------------------------------------------------------------
 Timing chan implementation ...
-Wall time: 3.02 sec
+Wall time: 3.20 sec
 
 Timing disruptor implementation ...
-Wall time: 3.40 sec
+Wall time: 4.10 sec
 ```
