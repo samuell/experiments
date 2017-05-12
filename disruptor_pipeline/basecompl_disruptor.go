@@ -10,11 +10,20 @@ import (
 )
 
 const (
-	BUFSIZE   = 128
-	FASTAFILE = "Homo_sapiens.GRCh37.67.dna_rm.chromosome.Y.fa"
+	BUFSIZE = 128
 )
 
 func main() {
+	// Parse flags
+	inFileName := flag.String("in", "i", "The input file name")
+	flag.Parse()
+
+	doExit := false
+	if *inFileName == "" {
+		fmt.Println("No filename specified to --in")
+		os.Exit(1)
+	}
+
 	// Init
 	frd := NewOsFileReader()
 	bc1 := NewBaseComplementer()
@@ -41,7 +50,7 @@ func main() {
 	// Run
 	go func() {
 		defer close(frd.In_FileName)
-		frd.In_FileName <- FASTAFILE
+		frd.In_FileName <- inFileName
 	}()
 	go frd.Run()
 	go bc1.Run()

@@ -1,10 +1,14 @@
-Homo_sapiens.GRCh37.67.dna_rm.chromosome.Y.fa.gz:
-	wget ftp://ftp.ensembl.org/pub/release-67/fasta/homo_sapiens/dna/$@
+%.fa.gz:
+	wget ftp://ftp.ensembl.org/pub/release-88/fasta/homo_sapiens/dna/$@
 
-Homo_sapiens.GRCh37.67.dna_rm.chromosome.Y.fa: Homo_sapiens.GRCh37.67.dna_rm.chromosome.Y.fa.gz
+%: %.gz
 	zcat $< > $@
 
-get_data: Homo_sapiens.GRCh37.67.dna_rm.chromosome.Y.fa
+chr1.fa: Homo_sapiens.GRCh38.dna.chromosome.1.fa
+	ln -s %< %@
+
+all.fa: Homo_sapiens.GRCh38.dna.toplevel.fa.gz
+	ln -s %< %@
 
 basecompl_chan: basecompl_chan.go
 	go build $<
@@ -18,7 +22,7 @@ basecompl_chan_4procs: basecompl_chan_4procs.go
 basecompl_disruptor_4procs: basecompl_disruptor_4procs.go
 	go build $<
 
-times.log: get_data basecompl_chan basecompl_disruptor
+times_all.log: all.fa basecompl_chan basecompl_disruptor
 	for i in $$(seq 1 4); do \
 	echo "--------------------------------------------------------------------------------"; \
 	export GOMAXPROCS=$$i; \
@@ -34,7 +38,7 @@ times.log: get_data basecompl_chan basecompl_disruptor
 	echo; \
 	done | tee $@;
 
-times_4procs.log: get_data basecompl_chan_4procs basecompl_disruptor_4procs
+times_chr1.log: all.fa basecompl_chan basecompl_disruptor
 	for i in $$(seq 1 4); do \
 	echo "--------------------------------------------------------------------------------"; \
 	export GOMAXPROCS=$$i; \
@@ -50,6 +54,4 @@ times_4procs.log: get_data basecompl_chan_4procs basecompl_disruptor_4procs
 	echo; \
 	done | tee $@;
 
-times: times.log
-
-times_4procs: times_4procs.log
+times: times_chr1.log times_all.log
