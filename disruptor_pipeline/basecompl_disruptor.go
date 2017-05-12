@@ -93,18 +93,18 @@ var convTable = [256]byte{
 func (p *BaseComplementer) Run() {
 	defer p.Out_FastaLine.Close()
 
-	var line []byte
 	for {
-		line = p.In_FastaLine.Recv()
+		line := p.In_FastaLine.Recv()
 		if line == nil {
 			break
 		}
-		if line[0] != '>' {
-			for pos := range line {
-				line[pos] = convTable[line[pos]]
+		l := line.Content
+		if l[0] != '>' {
+			for pos := range l {
+				l[pos] = convTable[l[pos]]
 			}
 		}
-		p.Out_FastaLine.Send(line)
+		p.Out_FastaLine.Send(NewFastaLine(l))
 	}
 }
 
@@ -145,7 +145,7 @@ func (p *FileReader) Run() {
 			if err := sc.Err(); err != nil {
 				panic(err)
 			}
-			p.Out_Line.Send(append([]byte(nil), sc.Bytes()...))
+			p.Out_Line.Send(NewFastaLine(sc.Bytes()))
 		}
 	}
 }
@@ -165,13 +165,13 @@ func NewPrinter() *Printer {
 }
 
 func (p *Printer) Run() {
-	var line []byte
 	for {
-		line = p.In_Line.Recv()
+		line := p.In_Line.Recv()
 		if line == nil {
 			break
 		}
-		fmt.Println(string(line))
+		l := line.Content
+		fmt.Println(string(l))
 	}
 }
 
@@ -190,6 +190,16 @@ func (p *Printer) Run() {
 // Masking is faster than division
 const idxMask uint64 = BUFSIZE - 1
 
+type FastaLine struct {
+	Content []byte
+}
+
+func NewFastaLine(newContent []byte) *FastaLine {
+	return &FastaLine{
+		Content: newContent,
+	}
+}
+
 type DisruptorChan struct {
 	pad1             [8]uint64
 	lastCommittedIdx uint64
@@ -198,7 +208,7 @@ type DisruptorChan struct {
 	pad3             [8]uint64
 	recvIdx          uint64
 	pad4             [8]uint64
-	contents         [BUFSIZE][]byte
+	contents         [BUFSIZE]*FastaLine
 	pad5             [8]uint64
 	open             bool
 }
@@ -207,7 +217,7 @@ func NewDisruptorChan() *DisruptorChan {
 	return &DisruptorChan{lastCommittedIdx: 0, nextFreeIdx: 1, recvIdx: 1, open: true}
 }
 
-func (c *DisruptorChan) Send(value []byte) {
+func (c *DisruptorChan) Send(value *FastaLine) {
 	var anIdx = atomic.AddUint64(&c.nextFreeIdx, 1) - 1
 	for anIdx > (c.recvIdx + BUFSIZE - 2) {
 		runtime.Gosched()
@@ -218,7 +228,7 @@ func (c *DisruptorChan) Send(value []byte) {
 	}
 }
 
-func (c *DisruptorChan) Recv() []byte {
+func (c *DisruptorChan) Recv() *FastaLine {
 	var anIdx = atomic.AddUint64(&c.recvIdx, 1) - 1
 	if anIdx > c.lastCommittedIdx && !c.IsOpen() {
 		return nil
