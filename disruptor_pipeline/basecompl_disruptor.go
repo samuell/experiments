@@ -184,6 +184,7 @@ func (p *Printer) Run() {
 //
 // Changes made:
 // - Use []byte as data type instead of payload.
+// - Added some closing logic
 // - Some naming changes (shorter names)
 // ------------------------------------------------
 
