@@ -1,7 +1,7 @@
 # Comparing channel and disruptor pattern performance
 
 This is an experiment to see how using the [LMAX disruptor pattern](https://lmax-exchange.github.io/disruptor/)
-as implemented in a slightly adapter version of [Darren Elwood](https://github.com/textnode)'s [gringo](https://github.com/textnode/gringo)
+as implemented in a slightly adapted version of [Darren Elwood](https://github.com/textnode)'s [gringo](https://github.com/textnode/gringo)
 lock-free ring buffer, as an alternative to plain Go channels.
 
 The example program used, is a chain of 8 similar [base-complementer](https://en.wikipedia.org/wiki/Complementarity_(molecular_biology)#DNA_and_RNA_base_pair_complementarity)
