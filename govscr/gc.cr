@@ -10,8 +10,9 @@ spawn do
   gcfile.each_line() do |line|
     lines_chan.send(line)
   end
-  lines_chan.close
   gcfile.close
+ensure
+  lines_chan.close
 end
 
 # ------------------------------------------------------------------------------
